@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>
+      Calculator Project
+    </title>
+    <!-- stylesheet link for css -->
+    <link rel="stylesheet" href="Calculator/stylesheet.css">
+
+    <!-- font api -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+
+
+
+
+    <h1>Welcome!</h1>
+    <br>
+    <h2>To use the calculator, click whichever numbers are required and compute as needed! Enjoy</h2>
+    <h5>Disclaimer: the Square Root key is currently inoperable, apologies for the inconvenience!</h5>
+    <br>
+
+
+  </head>
+  <body>
+
+  <div class="calculator">
+
+    <input type="text" class="calculator-screen" value="0" disabled /> <!-- 'disabled' is a boolean attribute that specifies an input element should be disabled, making it unusable; applies until some other condition has been met, and javascript can remove the disabled value and make the element usable-->
+
+    <div class="calculator-content"> <!-- separated by row -->
+
+      <!-- first row -->
+      <button type="button" class="all-clear" value="MC">MC</button>
+      <button type="button" class="operator" value="square-root">&radic;</button>
+      <button type="button" class="operator" value="/">&divide;</button>
+      <button type="button" class="operator" value="*">&times;</button>
+
+      <!-- second row -->
+      <button type="button" value="7" >7</button>
+      <button type="button" value="8" >8</button>
+      <button type="button" value="9" >9</button>
+      <button type="button" class="operator" value="-" >-</button>
+
+      <!-- third row -->
+      <button type="button" value="4" >4</button>
+      <button type="button" value="5" >5</button>
+      <button type="button" value="6" >6</button>
+      <button type="button" class="operator" value="+" >+</button>
+
+      <!-- fourth row -->
+      <button type="button" value="1" >1</button>
+      <button type="button" value="2" >2</button>
+      <button type="button" value="3" >3</button>
+      <button type="button" class="equal-sign operator" value="=" >=</button>
+
+      <!-- fifth row -->
+      <button type="button" class="zero" value="0" >0</button>
+      <button type="button" class="decimal" value="." >.</button>
+
+
+
+    </div>
+  </div>
+
+
+  <script type="text/javascript">
+
+    const calculator = {
+      displayValue: '0', /*hold a string value that represents th input of the user/ operation results */
+      firstOperand: null, /*stores the first operand for any expression*/
+      waitingForSecondOperand: false, /*checks is firts operand and operater have been entered, if true the next numbers input become the second operand */
+      operator: null,
+    };
+
+    function inputDigit(digit) {
+      const { displayValue, waitingForSecondOperand } = calculator;
+
+      if(waitingForSecondOperand === true) {
+        calculator.displayValue = digit;
+        calculator.waitingForSecondOperand = false;
+      }
+      else {
+          //overwrite displayvalue if the current value is '0' otherwise append to it
+        calculator.displayValue = displayValue === '0' ? digit : displayValue + digit;
+      }
+      console.log(calculator);
+    }
+
+    function inputDecimal(dot) {
+
+      //fixes decimal bug where the decimal would be appended to the end of the firstOperand instead of the beginning of the secondOperand
+      //also makes appearance more of a traditional calculator and shows 0 when inputting new numbers
+      if(calculator.waitingForSecondOperand === true) {
+        calculator.displayValue = '0';
+        calculator.waitingForSecondOperand = false;
+        return;
+      }
+
+
+      //if the displayValue property doesn't contain a decimal point
+      if(!calculator.displayValue.includes(dot)){  //includes method is used to check if displayValue doesn't already contain a decimal point; yes = dot is appended, no = exits function
+        //append the decimal point
+        calculator.displayValue += dot;
+      }
+    }
+
+    //Handling Operators
+    function handleOperator(nextOperator) {
+      //destructure the properties on the calculator object
+      const{ firstOperand, displayValue, operator} = calculator
+      //'parseFloat' converts the string contents of 'displayValue'
+      // to a floating point numbers
+      const inputValue = parseFloat(displayValue);
+
+      //waitingForSecondOperand is true since it waits for a second operator to be entered
+      //checks if operator exists and WFSO is set to true, and replaces current operator with new operator if so and no calculations are performed until number entry
+      //resets original operand in case of typo or attempt to adjust equation
+      if(operator && calculator.waitingForSecondOperand) {
+        calculator.operator = nextOperator;
+        console.log(calculator);
+        return;
+      }
+
+      //verify that 'firstOperand' is null and that the 'inputValue'
+      // is not a 'NaN' values
+      if(firstOperand == null && !isNaN(inputValue)) {
+        //update the firstOperand property
+        calculator.firstOperand = inputValue;
+      }
+
+      //checks if operator property has been assigned an operator, invoking calculate function and saving results
+      //gets displayed by display.value, first operand result is updated so it can be used next in the calculator
+      else if(operator) {
+        const result = calculate(firstOperand, inputValue, operator);
+
+        calculator.displayValue = String(result);
+        calculator.firstOperand = result;
+      }
+
+      calculator.waitingForSecondOperand = true;
+      calculator.operator = nextOperator;
+      console.log(calculator)
+    }
+
+    //for when user hits an operator after the second operand
+    //essentially when the user attempts to perform an equation
+
+    function calculate(firstOperand, secondOperand, operator) {
+      if(operator === '+') {
+        return firstOperand + secondOperand;
+      }
+      else if(operator === '-') {
+        return firstOperand - secondOperand;
+      }
+      else if(operator === '*') {
+        return firstOperand * secondOperand;
+      }
+      else if(operator === '/') {
+        return firstOperand / secondOperand;
+      }
+      return secondOperand;
+    }
+
+
+    //resets all properties of the calculator object to original values, 'clearing' the screen
+    function resetCalculator() {
+      calculator.displayValue = '0';
+      calculator.firstOperand = null;
+      calculator.waitingForSecondOperand = false;
+      calculator.operator = null;
+      console.log(calculator);
+    }
+
+
+    //function to handle single operand equations
+    /*
+    function singleOperandCalculation(firstOperand, operator) {
+      if(operator === 'square-root') {
+        return Math.sqrt(firstOperand);
+      }
+    }
+    */
+
+
+
+    /*displayValue mudt be shown on the screen at all times so user can see inputs */
+    function updateDisplay() {
+      //selects element with calculator-screen class
+      const display = document.querySelector('.calculator-screen'); //const creates reference to the value, object properties can be changed but not the reference to the value
+//updates value of the element with the contents of displayValue
+      display.value = calculator.displayValue;
+    }
+
+    updateDisplay(); //adjusts the 'disabled' text input to allow displays on the calculator
+
+
+    // **************************************************************** Original Event Listener for Key Presses ***********************************************************
+    //Handling Key Presses
+    /* const keys = document.querySelector('.calculator-content');
+    keys.addEventListener('click', (event) => {
+      //accesses the cliked elements
+      const {target} = event; //target is an object that represents the element that was clicked; extracts target property of click event using destructuring assignment (syntax that makes it possible to unpacks values from arrays into variables)
+
+      //checks if clicked element is a button, if not exit function
+      if(!target.matches('button')) {
+        return;
+      }
+
+      if(target.classList.contains('operator')) {
+        //console.log('operator', target.value);
+        handleOperator(target.value);
+        updateDisplay();
+        return;
+      }
+
+      if(target.classList.contains('decimal')) {
+        //console.log('decimal', target.value);
+        inputDecimal(target.value);
+        updateDisplay();
+        return;
+      }
+
+
+
+      if(target.classList.contains('all-clear')) {
+          // console.log('clear', target.value);
+          resetCalculator();
+          updateDisplay();
+          return;
+      }
+
+      //console.log('digit', target.value);
+
+      inputDigit(target.value);
+      updateDisplay(); */
+
+      // ******************************************************* Refactored Event Listener for Key Presses *********************************************************************
+      const keys = document.querySelector('.calculator-content');
+      keys.addEventListener('click', (event) => {
+
+        const {target} = event;
+        const {value} = target;
+
+        if(!target.matches('button')) {
+          return;
+        }
+
+        switch(value) {
+          case '+':
+          case '-':
+          case '*':
+          case '/':
+          case '=':
+            handleOperator(value);
+            break;
+          case '.':
+            inputDecimal(value);
+            break;
+          case 'MC':
+            resetCalculator();
+            break;
+          default:
+            //checks if the key is an integer
+            if(Number.isInteger(parseFloat(value))) {
+              inputDigit(value);
+            }
+        }
+      updateDisplay();
+
+      //easier to add new functions to calculator and updateDisplay does not need to be after each operation
+    });
+
+    //listens for a click event on an element with the class of calculator keys; called event delegation
+
+    //Inputting the Digits , so when button is clicked the corresponding number appears on the screen
+
+
+
+
+
+
+  </script>
+
+
+
+  </body>
+</html>
